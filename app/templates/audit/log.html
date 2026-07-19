@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Audit Log - StockFlow{% endblock %}
+{% block page_heading %}Audit Log{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-journal-text"></i> Audit Log</h3>
+<p class="text-muted small mb-3">
+  A complete record of administrative and security-relevant actions — user management, product/warehouse
+  changes, and login attempts. This is separate from the <a href="/inventory/transactions">stock transaction
+  ledger</a>, which tracks inventory movements specifically.
+</p>
+
+<form method="get" action="/audit-log" class="card sf-card mb-3 p-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small">Action Type</label>
+      <select name="action" class="form-select">
+        <option value="">All Actions</option>
+        {% for a in actions %}
+        <option value="{{ a }}" {% if selected_action == a %}selected{% endif %}>{{ a.replace('_', ' ')|title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search"></i> Filter</button>
+    </div>
+    {% if selected_action %}
+    <div class="col-md-2">
+      <a href="/audit-log" class="btn btn-outline-secondary w-100"><i class="bi bi-x-lg"></i> Clear</a>
+    </div>
+    {% endif %}
+  </div>
+</form>
+
+<div class="card sf-card">
+  <div class="card-body">
+    {% if result.total > 0 %}
+    <div class="text-muted small mb-2">
+      Showing {{ result.entries|length }} of {{ result.total }} log entries
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+    <table class="table table-hover table-sm align-middle">
+      <thead>
+        <tr><th>Timestamp</th><th>Action</th><th>Performed By</th><th>Entity</th><th>Details</th></tr>
+      </thead>
+      <tbody>
+      {% for entry in result.entries %}
+        <tr>
+          <td class="text-nowrap">{{ entry.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+          <td>
+            {% if "FAILED" in entry.action or "DELETE" in entry.action or "DEACTIVATE" in entry.action %}
+              <span class="badge bg-danger">{{ entry.action.replace('_', ' ')|title }}</span>
+            {% elif "CREATE" in entry.action or "LOGIN_SUCCESS" in entry.action or "REACTIVATE" in entry.action %}
+              <span class="badge bg-success">{{ entry.action.replace('_', ' ')|title }}</span>
+            {% elif "UPDATE" in entry.action %}
+              <span class="badge bg-primary">{{ entry.action.replace('_', ' ')|title }}</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ entry.action.replace('_', ' ')|title }}</span>
+            {% endif %}
+          </td>
+          <td>{{ entry.user.username if entry.user else "—" }}</td>
+          <td>
+            {% if entry.entity_type %}
+              {{ entry.entity_type }}{% if entry.entity_id %} #{{ entry.entity_id }}{% endif %}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td class="text-muted small">{{ entry.details or "—" }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="5" class="text-center py-5">
+            <i class="bi bi-journal-x" style="font-size:2.5rem;color:#cbd5e1;"></i>
+            <p class="text-muted mt-2 mb-0">No audit log entries {% if selected_action %}match this filter{% else %}yet{% endif %}.</p>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+
+    {% if result.total_pages > 1 %}
+    <nav class="mt-3">
+      <ul class="pagination justify-content-center mb-0">
+        <li class="page-item {% if not result.has_previous %}disabled{% endif %}">
+          <a class="page-link" href="/audit-log?action={{ selected_action }}&page={{ result.page - 1 }}"><i class="bi bi-chevron-left"></i></a>
+        </li>
+        <li class="page-item disabled"><span class="page-link">Page {{ result.page }} of {{ result.total_pages }}</span></li>
+        <li class="page-item {% if not result.has_next %}disabled{% endif %}">
+          <a class="page-link" href="/audit-log?action={{ selected_action }}&page={{ result.page + 1 }}"><i class="bi bi-chevron-right"></i></a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

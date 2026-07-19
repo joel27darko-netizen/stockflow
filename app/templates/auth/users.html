@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Users - StockFlow{% endblock %}
+{% block page_heading %}Users{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-people"></i> User Management</h3>
+
+<div class="row">
+  <div class="col-lg-5 mb-4">
+    <div class="card sf-card">
+      <div class="card-body">
+        <h5 class="card-title">Add New User</h5>
+        {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+        <form method="post" action="/users">
+          <div class="mb-2">
+            <label class="form-label">Username</label>
+            <input name="username" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Full Name</label>
+            <input name="full_name" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" minlength="6" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select">
+              {% for r in roles %}
+              <option value="{{ r.value }}">{{ r.value.replace('_',' ')|title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="btn btn-primary w-100" type="submit"><i class="bi bi-person-plus"></i> Create User</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card sf-card">
+      <div class="card-body">
+        <h5 class="card-title">All Users</h5>
+        <table class="table table-hover align-middle">
+          <thead><tr><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+          {% for u in users %}
+            <tr>
+              <td>{{ u.username }}</td>
+              <td>{{ u.full_name }}</td>
+              <td>{{ u.email }}</td>
+              <td><span class="badge bg-secondary">{{ u.role.value.replace('_',' ')|title }}</span></td>
+              <td>
+                {% if u.is_active %}
+                  <span class="badge badge-in-stock">Active</span>
+                {% else %}
+                  <span class="badge badge-low-stock">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if u.id != current_user.id %}
+                  {% if u.is_active %}
+                  <form method="post" action="/users/{{ u.id }}/deactivate" class="d-inline" data-confirm="Deactivate {{ u.username }}? They will no longer be able to log in." data-confirm-danger="false">
+                    <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-slash-circle"></i> Deactivate</button>
+                  </form>
+                  {% else %}
+                  <form method="post" action="/users/{{ u.id }}/reactivate" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-arrow-counterclockwise"></i> Reactivate</button>
+                  </form>
+                  {% endif %}
+                  <form method="post" action="/users/{{ u.id }}/delete" class="d-inline" data-confirm="Permanently delete {{ u.username }}? This cannot be undone. This will fail if the user has transaction history — deactivate instead in that case.">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                  </form>
+                {% else %}
+                  <span class="text-muted small">(you)</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

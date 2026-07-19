@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Login - StockFlow{% endblock %}
+{% block content %}
+<div class="sf-login-wrapper">
+  <div class="card sf-card login-card">
+    <div class="card-body p-4 p-md-5">
+      <div class="text-center mb-4">
+        <i class="bi bi-box-seam-fill" style="font-size:2.8rem;color:#2563eb;"></i>
+        <h3 class="mt-3 fw-bold">StockFlow</h3>
+        <p class="text-muted mb-0">Inventory &amp; Warehouse Management</p>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger d-flex align-items-start gap-2">
+        <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+        <div>{{ error }}</div>
+      </div>
+      {% endif %}
+
+      <form method="post" action="/login" data-loading-text="Signing in…">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input type="text" name="username" class="form-control" required autofocus>
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" name="password" id="loginPassword" class="form-control" required>
+            <button class="btn btn-outline-secondary" type="button" onclick="
+              const f = document.getElementById('loginPassword');
+              f.type = f.type === 'password' ? 'text' : 'password';
+              this.querySelector('i').className = f.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+            "><i class="bi bi-eye"></i></button>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me" value="true">
+            <label class="form-check-label small" for="rememberMe">Remember me</label>
+          </div>
+          <a href="#" class="small" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-2">
+          <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </button>
+      </form>
+
+      <div class="mt-4 text-center text-muted small">
+        Default admin: <code>admin</code> / <code>Admin@123</code>
+        <div class="mt-1">(you'll be asked to set a new password on first login)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot password: honest simulation. There's no email/SMS
+     infrastructure in this portfolio build, so rather than faking a
+     "reset link sent" flow that goes nowhere, this explains the real
+     (and realistic, for an internal tool) process: an admin resets it. -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-key"></i> Forgot Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>StockFlow doesn't have self-service password reset (no email delivery is configured for this deployment).</p>
+        <p class="mb-0">If you've forgotten your password, ask a StockFlow <strong>Admin</strong> to create a new
+        temporary password for your account from <em>Users → Create User</em>, or reset it via the database directly.
+        You'll be required to set your own new password the next time you log in.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

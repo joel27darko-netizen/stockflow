@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Categories - StockFlow{% endblock %}
+{% block page_heading %}Categories{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-tags"></i> Categories</h3>
+
+<div class="row">
+  <div class="col-lg-5 mb-4">
+    <div class="card sf-card">
+      <div class="card-body">
+        <h5 class="card-title">Add Category</h5>
+        {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+        <form method="post" action="/products/categories/manage">
+          <div class="mb-2">
+            <label class="form-label">Name</label>
+            <input name="name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="2"></textarea>
+          </div>
+          <button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg"></i> Add Category</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card sf-card">
+      <div class="card-body">
+        <table class="table">
+          <thead><tr><th>Name</th><th>Description</th></tr></thead>
+          <tbody>
+          {% for c in categories %}
+            <tr><td>{{ c.name }}</td><td>{{ c.description or "—" }}</td></tr>
+          {% else %}
+            <tr><td colspan="2" class="text-muted text-center">No categories yet.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<a href="/products" class="btn btn-outline-secondary mt-2"><i class="bi bi-arrow-left"></i> Back to Products</a>
+{% endblock %}

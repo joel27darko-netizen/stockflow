@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Bulk Import Products - StockFlow{% endblock %}
+{% block page_heading %}Bulk Import{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3><i class="bi bi-upload"></i> Bulk Import Products</h3>
+  <a href="/products" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Products</a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+{% if not result %}
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card sf-card">
+      <div class="card-body">
+        <h5 class="card-title">Upload a File</h5>
+        <p class="text-muted small">
+          Accepts <strong>.csv</strong> or <strong>.xlsx</strong> files (max 5 MB). Each row becomes one product.
+          Rows with problems are skipped individually — the rest of the file still imports, and you'll get a
+          full report of what succeeded and what didn't.
+        </p>
+        <form method="post" action="/products/import" enctype="multipart/form-data" data-loading-text="Importing…">
+          <div class="mb-3">
+            <input type="file" name="file" class="form-control" accept=".csv,.xlsx" required>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Import</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card sf-card">
+      <div class="card-body">
+        <h5 class="card-title">Expected Format</h5>
+        <p class="text-muted small mb-2">Required columns: <code>name</code>, <code>price</code></p>
+        <p class="text-muted small mb-2"><code>product_code</code> is optional — leave a row's code blank and StockFlow will auto-generate one.</p>
+        <p class="text-muted small">Optional columns: <code>description</code>, <code>category</code>, <code>reorder_level</code> (defaults to 10)</p>
+        <p class="text-muted small">
+          If a <code>category</code> doesn't exist yet, it's created automatically. Product codes are matched
+          case-insensitively and normalized to uppercase.
+        </p>
+        <a href="/products/import/template.csv" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-download"></i> Download CSV Template
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card sf-card">
+      <div class="card-body text-center">
+        <div class="sf-metric-value">{{ result.total_rows }}</div>
+        <div class="text-muted small">Total Rows Processed</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card sf-card">
+      <div class="card-body text-center">
+        <div class="sf-metric-value text-success">{{ result.created_count }}</div>
+        <div class="text-muted small">Products Created</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card sf-card">
+      <div class="card-body text-center">
+        <div class="sf-metric-value {% if result.error_count %}text-danger{% endif %}">{{ result.error_count }}</div>
+        <div class="text-muted small">Rows Skipped (Errors)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if result.errors %}
+<div class="card sf-card mb-3">
+  <div class="card-body">
+    <h5 class="card-title text-danger"><i class="bi bi-exclamation-triangle"></i> Rows That Could Not Be Imported</h5>
+    <table class="table table-sm">
+      <thead><tr><th>Row #</th><th>Product Code</th><th>Reason</th></tr></thead>
+      <tbody>
+      {% for err in result.errors %}
+        <tr>
+          <td>{{ err.row_number }}</td>
+          <td>{{ err.product_code }}</td>
+          <td class="text-danger">{{ err.message }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="d-flex gap-2">
+  <a href="/products" class="btn btn-primary"><i class="bi bi-box"></i> View Products</a>
+  <a href="/products/import" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Import Another File</a>
+</div>
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,62 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ===== Virtual environments =====
+.venv/
+venv/
+env/
+ENV/
+
+# ===== Environment / secrets =====
+.env
+.env.*
+!.env.example
+
+# ===== Database =====
+*.db
+*.sqlite
+*.sqlite3
+stockflow.db
+
+# ===== Logs =====
+logs/
+*.log
+
+# ===== Testing / coverage =====
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ===== Generated app files (recreated at runtime, not source) =====
+app/static/qrcodes/*.png
+app/static/barcodes/*.png
+app/static/product_images/*.jpg
+app/static/product_images/*.jpeg
+app/static/product_images/*.png
+!app/static/qrcodes/.gitkeep
+!app/static/barcodes/.gitkeep
+!app/static/product_images/.gitkeep
+
+# ===== IDE / editor =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== OS junk =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Alembic (keep migrations, ignore local cache if any) =====
+alembic/versions/__pycache__/

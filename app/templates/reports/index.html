@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Reports - StockFlow{% endblock %}
+{% block page_heading %}Reports{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-file-earmark-bar-graph"></i> Reports &amp; Exports</h3>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card sf-card">
+      <div class="card-body text-center">
+        <i class="bi bi-file-earmark-spreadsheet" style="font-size:2rem;color:#16a34a;"></i>
+        <h5 class="mt-2">Products</h5>
+        <p class="text-muted small">Full product list with quantities and values.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="/reports/products/csv" class="btn btn-success btn-sm"><i class="bi bi-download"></i> CSV</a>
+          <a href="/reports/products/xlsx" class="btn btn-outline-success btn-sm"><i class="bi bi-download"></i> Excel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card sf-card">
+      <div class="card-body text-center">
+        <i class="bi bi-file-earmark-spreadsheet" style="font-size:2rem;color:#2563eb;"></i>
+        <h5 class="mt-2">Transactions</h5>
+        <p class="text-muted small">Complete stock movement ledger.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="/reports/transactions/csv" class="btn btn-primary btn-sm"><i class="bi bi-download"></i> CSV</a>
+          <a href="/reports/transactions/xlsx" class="btn btn-outline-primary btn-sm"><i class="bi bi-download"></i> Excel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card sf-card">
+      <div class="card-body text-center">
+        <i class="bi bi-file-earmark-pdf" style="font-size:2rem;color:#dc2626;"></i>
+        <h5 class="mt-2">Inventory Summary PDF</h5>
+        <p class="text-muted small">Formatted summary report for stakeholders.</p>
+        <a href="/reports/inventory/pdf" class="btn btn-danger btn-sm"><i class="bi bi-download"></i> Download PDF</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

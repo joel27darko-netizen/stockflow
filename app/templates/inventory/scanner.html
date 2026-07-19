@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Scanner - StockFlow{% endblock %}
+{% block page_heading %}Scanner{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-upc-scan"></i> Barcode / QR Scanner</h3>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="scanner-box {% if scanned_product %}sf-scan-success{% elif error %}sf-scan-error{% endif %}" id="scannerBox" style="min-height: 260px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <video id="scannerVideo" width="100%" style="display:none;border-radius:8px;max-height:220px;object-fit:cover;" autoplay muted></video>
+      <div id="scannerIdleIcon">
+        <i class="bi bi-qr-code-scan" style="font-size:4rem;color:#94a3b8;"></i>
+      </div>
+      <p class="text-muted mb-2 mt-2">Activate your webcam to simulate scanning, then confirm the code manually below.</p>
+      <button type="button" class="btn btn-outline-primary" onclick="startSimulatedScan()">
+        <i class="bi bi-camera-video"></i> Activate Camera
+      </button>
+      <div id="scannerStatus" class="small mt-2"></div>
+    </div>
+
+    <div class="card sf-card mt-3">
+      <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger d-flex align-items-start gap-2 sf-scan-result-enter">
+          <i class="bi bi-x-circle-fill mt-1"></i>
+          <div>{{ error }}</div>
+        </div>
+        {% endif %}
+        <form method="post" action="/inventory/scanner" data-loading-text="Looking up…">
+          <label class="form-label">Product Code / Barcode Value</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-upc"></i></span>
+            <input type="text" name="code" class="form-control" placeholder="e.g. SKU-1001" required autofocus>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Lookup</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    {% if scanned_product %}
+    <div class="card sf-card sf-scan-result-enter">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-2 mb-3 text-success">
+          <i class="bi bi-check-circle-fill" style="font-size:1.4rem;"></i>
+          <span class="fw-semibold">Product Found</span>
+        </div>
+        <div class="row">
+          {% if scanned_product.image_path %}
+          <div class="col-4">
+            <img src="{{ scanned_product.image_path }}" class="product-photo w-100" style="max-width:none;" alt="">
+          </div>
+          {% endif %}
+          <div class="{% if scanned_product.image_path %}col-8{% else %}col-12{% endif %}">
+            <h5 class="card-title mb-1">{{ scanned_product.name }}</h5>
+            <p class="text-muted mb-1 small">Code: {{ scanned_product.product_code }}</p>
+            <p class="mb-1">Quantity in stock:
+              {% if scanned_product.is_low_stock %}
+              <span class="badge badge-low-stock">{{ scanned_product.total_quantity }} (Low)</span>
+              {% else %}
+              <span class="badge badge-in-stock">{{ scanned_product.total_quantity }}</span>
+              {% endif %}
+            </p>
+            <p class="mb-0">Price: <strong>${{ "%.2f"|format(scanned_product.price) }}</strong></p>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <a href="/products/{{ scanned_product.id }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> View Full Details</a>
+          <a href="/inventory/operations" class="btn btn-sm btn-outline-success"><i class="bi bi-arrow-left-right"></i> Stock Operations</a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="card sf-card">
+      <div class="card-body text-muted text-center py-5">
+        <i class="bi bi-search" style="font-size:2rem;color:#cbd5e1;"></i>
+        <p class="mt-2 mb-0">Scan or enter a code to look up a product.</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

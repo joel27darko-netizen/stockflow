@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Products - StockFlow{% endblock %}
+{% block page_heading %}Products{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3><i class="bi bi-box"></i> Products</h3>
+  <div>
+    <a href="/products/categories/manage" class="btn btn-outline-secondary btn-sm"><i class="bi bi-tags"></i> Categories</a>
+    {% if current_user.role.value in ["admin", "warehouse_manager"] %}
+    <a href="/products/import" class="btn btn-outline-secondary btn-sm"><i class="bi bi-upload"></i> Bulk Import</a>
+    <a href="/products/new" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> New Product</a>
+    {% endif %}
+  </div>
+</div>
+
+<form method="get" action="/products" class="card sf-card mb-3 p-3" data-no-spinner>
+  <div class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small">Search</label>
+      <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Name, code, or description">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small">Category</label>
+      <select name="category_id" class="form-select">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}" {% if category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3 form-check mt-4">
+      <input type="checkbox" class="form-check-input" id="lowStock" name="low_stock_only" value="true" {% if low_stock_only %}checked{% endif %}>
+      <label class="form-check-label" for="lowStock">Low stock only</label>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-outline-primary flex-fill"><i class="bi bi-search"></i> Filter</button>
+      {% if q or category_id or low_stock_only %}
+      <a href="/products" class="btn btn-outline-secondary" title="Clear all filters" data-bs-toggle="tooltip"><i class="bi bi-x-lg"></i></a>
+      {% endif %}
+    </div>
+  </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+  <div class="input-group" style="max-width: 280px;">
+    <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
+    <input type="text" id="sfQuickFilter" class="form-control form-control-sm" placeholder="Quick filter this page…">
+  </div>
+  <div class="btn-group sf-view-toggle" role="group" aria-label="View toggle">
+    <button type="button" id="sfViewList" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="List view">
+      <i class="bi bi-list-ul"></i>
+    </button>
+    <button type="button" id="sfViewCard" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Card view">
+      <i class="bi bi-grid-3x3-gap"></i>
+    </button>
+  </div>
+</div>
+
+{% if result.total > 0 %}
+<div class="text-muted small mb-2">
+  Showing <strong>{{ result.start_index }}–{{ result.end_index }}</strong> of <strong>{{ result.total }}</strong>
+  {% if q or category_id or low_stock_only %}matching{% else %}total{% endif %} product{{ "s" if result.total != 1 else "" }}
+</div>
+{% endif %}
+
+<!-- LIST VIEW -->
+<div id="sfProductListView">
+  <div class="card sf-card">
+    <div class="card-body">
+      <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr><th>Code</th><th>Name</th><th>Category</th><th>Price</th><th>Qty</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for p in result.products %}
+          <tr data-filter-target="{{ p.product_code }} {{ p.name }} {{ p.category.name if p.category else '' }}">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                {% if p.image_path %}
+                <img src="{{ p.image_path }}" class="product-thumb-sm" alt="">
+                {% endif %}
+                <a href="/products/{{ p.id }}" class="fw-semibold text-decoration-none">{{ p.product_code }}</a>
+              </div>
+            </td>
+            <td>
+              {{ p.name }}
+              {% if p.description %}
+              <i class="bi bi-info-circle text-muted small" title="{{ p.description }}" data-bs-toggle="tooltip"></i>
+              {% endif %}
+            </td>
+            <td>{{ p.category.name if p.category else "—" }}</td>
+            <td>${{ "%.2f"|format(p.price) }}</td>
+            <td>{{ p.total_quantity }}</td>
+            <td>
+              {% if not p.is_active %}
+                <span class="badge bg-secondary">Inactive</span>
+              {% elif p.is_low_stock %}
+                <span class="badge badge-low-stock">Low Stock</span>
+              {% else %}
+                <span class="badge badge-in-stock">In Stock</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="/products/{{ p.id }}" class="btn btn-sm btn-outline-secondary" title="View details" data-bs-toggle="tooltip"><i class="bi bi-eye"></i></a>
+              {% if current_user.role.value in ["admin", "warehouse_manager"] %}
+              <a href="/products/{{ p.id }}/edit" class="btn btn-sm btn-outline-primary" title="Edit" data-bs-toggle="tooltip"><i class="bi bi-pencil"></i></a>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              {% if not has_any_products %}
+                <i class="bi bi-box-seam" style="font-size:2.5rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-2">You haven't added any products yet.</p>
+                {% if current_user.role.value in ["admin", "warehouse_manager"] %}
+                <a href="/products/new" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Your First Product</a>
+                {% endif %}
+              {% else %}
+                <i class="bi bi-search" style="font-size:2.5rem;color:#cbd5e1;"></i>
+                <p class="text-muted mt-2 mb-2">No products match your current filters.</p>
+                <a href="/products" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-lg"></i> Clear Filters</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CARD VIEW -->
+<div id="sfProductCardView" class="d-none">
+  <div class="row g-3">
+    {% for p in result.products %}
+    <div class="col-sm-6 col-lg-4 col-xl-3" data-filter-target="{{ p.product_code }} {{ p.name }} {{ p.category.name if p.category else '' }}">
+      <div class="sf-product-card">
+        <div class="sf-product-card-image">
+          {% if p.image_path %}
+          <img src="{{ p.image_path }}" alt="{{ p.name }}">
+          {% else %}
+          <i class="bi bi-box-seam" style="font-size:2.5rem;color:#cbd5e1;"></i>
+          {% endif %}
+          {% if p.qr_code_path %}
+          <img src="{{ p.qr_code_path }}" class="sf-product-card-qr" alt="QR" title="QR code" data-bs-toggle="tooltip">
+          {% endif %}
+        </div>
+        <div class="sf-product-card-body">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <span class="fw-semibold small text-muted">{{ p.product_code }}</span>
+            {% if not p.is_active %}
+              <span class="badge bg-secondary">Inactive</span>
+            {% elif p.is_low_stock %}
+              <span class="badge badge-low-stock">Low Stock</span>
+            {% else %}
+              <span class="badge badge-in-stock">In Stock</span>
+            {% endif %}
+          </div>
+          <div class="fw-semibold mb-1">{{ p.name }}</div>
+          <div class="text-muted small mb-2">{{ p.category.name if p.category else "Uncategorized" }}</div>
+          <div class="d-flex justify-content-between align-items-center mt-auto">
+            <span class="fw-bold">${{ "%.2f"|format(p.price) }}</span>
+            <span class="text-muted small">Qty: {{ p.total_quantity }}</span>
+          </div>
+          <div class="d-flex gap-2 mt-2">
+            <a href="/products/{{ p.id }}" class="btn btn-sm btn-outline-secondary flex-fill"><i class="bi bi-eye"></i> View</a>
+            {% if current_user.role.value in ["admin", "warehouse_manager"] %}
+            <a href="/products/{{ p.id }}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+      <i class="bi bi-box-seam" style="font-size:2.5rem;color:#cbd5e1;"></i>
+      <p class="text-muted mt-2 mb-0">No products to show.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if result.total_pages > 1 %}
+<nav class="mt-3">
+  <ul class="pagination justify-content-center mb-0">
+    <li class="page-item {% if not result.has_previous %}disabled{% endif %}">
+      <a class="page-link" href="/products?{{ querystring }}{% if querystring %}&{% endif %}page={{ result.page - 1 }}">
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    </li>
+    {% for p in range(1, result.total_pages + 1) %}
+      {% if p == result.page %}
+      <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+      {% elif p == 1 or p == result.total_pages or (p >= result.page - 1 and p <= result.page + 1) %}
+      <li class="page-item">
+        <a class="page-link" href="/products?{{ querystring }}{% if querystring %}&{% endif %}page={{ p }}">{{ p }}</a>
+      </li>
+      {% elif p == result.page - 2 or p == result.page + 2 %}
+      <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+    <li class="page-item {% if not result.has_next %}disabled{% endif %}">
+      <a class="page-link" href="/products?{{ querystring }}{% if querystring %}&{% endif %}page={{ result.page + 1 }}">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

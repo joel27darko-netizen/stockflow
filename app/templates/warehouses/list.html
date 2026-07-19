@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Warehouses - StockFlow{% endblock %}
+{% block page_heading %}Warehouses{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-building"></i> Warehouses &amp; Locations</h3>
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+<div class="row g-3">
+  {% if current_user.role.value in ["admin", "warehouse_manager"] %}
+  <div class="col-lg-6">
+    <div class="card sf-card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Add Warehouse</h5>
+        <form method="post" action="/warehouses/new">
+          <div class="mb-2">
+            <label class="form-label">Name</label>
+            <input name="name" class="form-control" required placeholder="e.g. Accra Central Warehouse">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <input name="address" class="form-control" placeholder="Optional">
+          </div>
+          <button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg"></i> Add Warehouse</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card sf-card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Add Shelf / Zone</h5>
+        <form method="post" action="/warehouses/locations/new">
+          <div class="mb-2">
+            <label class="form-label">Warehouse</label>
+            <select name="warehouse_id" class="form-select" required>
+              {% for w in warehouses %}
+              {% if w.is_active %}
+              <option value="{{ w.id }}">{{ w.name }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Zone</label>
+            <input name="zone" class="form-control" required placeholder="e.g. Zone A">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Shelf</label>
+            <input name="shelf" class="form-control" placeholder="e.g. Shelf 3 (optional)">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <input name="notes" class="form-control" placeholder="Optional">
+          </div>
+          <button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg"></i> Add Location</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card sf-card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="card-title mb-0">Warehouses</h5>
+      <a href="/warehouses?show_inactive={{ 'false' if show_inactive else 'true' }}" class="btn btn-outline-secondary btn-sm">
+        {% if show_inactive %}<i class="bi bi-eye-slash"></i> Hide Inactive{% else %}<i class="bi bi-eye"></i> Show Inactive{% endif %}
+      </a>
+    </div>
+    <table class="table table-hover">
+      <thead><tr><th>Name</th><th>Address</th><th>Status</th>{% if current_user.role.value in ["admin", "warehouse_manager"] %}<th></th>{% endif %}</tr></thead>
+      <tbody>
+      {% for w in warehouses %}
+        <tr>
+          <td>{{ w.name }}</td>
+          <td>{{ w.address or "—" }}</td>
+          <td>
+            {% if w.is_active %}<span class="badge badge-in-stock">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+          </td>
+          {% if current_user.role.value in ["admin", "warehouse_manager"] %}
+          <td class="text-end">
+            {% if w.is_active %}
+            <form method="post" action="/warehouses/{{ w.id }}/deactivate" class="d-inline" data-confirm="Deactivate {{ w.name }}? Its locations will be hidden from new stock operations." data-confirm-danger="false">
+              <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-slash-circle"></i> Deactivate</button>
+            </form>
+            {% else %}
+            <form method="post" action="/warehouses/{{ w.id }}/reactivate" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-arrow-counterclockwise"></i> Reactivate</button>
+            </form>
+            <form method="post" action="/warehouses/{{ w.id }}/delete" class="d-inline" data-confirm="Permanently delete {{ w.name }}? This cannot be undone and will fail if any of its locations have transaction history.">
+              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+            {% endif %}
+          </td>
+          {% endif %}
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="text-muted text-center py-3">No warehouses yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card sf-card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">All Locations</h5>
+    <table class="table table-hover">
+      <thead><tr><th>Warehouse</th><th>Zone / Shelf</th><th>Notes</th><th>Status</th>{% if current_user.role.value in ["admin", "warehouse_manager"] %}<th></th>{% endif %}</tr></thead>
+      <tbody>
+      {% for loc in locations %}
+        <tr>
+          <td>{{ loc.warehouse.name }}</td>
+          <td>{{ loc.display_name }}</td>
+          <td>{{ loc.notes or "—" }}</td>
+          <td>
+            {% if loc.is_active %}<span class="badge badge-in-stock">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+          </td>
+          {% if current_user.role.value in ["admin", "warehouse_manager"] %}
+          <td class="text-end">
+            {% if loc.is_active %}
+            <form method="post" action="/warehouses/locations/{{ loc.id }}/deactivate" class="d-inline" data-confirm="Deactivate this location?" data-confirm-danger="false">
+              <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-slash-circle"></i> Deactivate</button>
+            </form>
+            {% else %}
+            <form method="post" action="/warehouses/locations/{{ loc.id }}/reactivate" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-arrow-counterclockwise"></i> Reactivate</button>
+            </form>
+            <form method="post" action="/warehouses/locations/{{ loc.id }}/delete" class="d-inline" data-confirm="Permanently delete this location? This cannot be undone and will fail if it has transaction history.">
+              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+            {% endif %}
+          </td>
+          {% endif %}
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="text-muted text-center py-3">No locations set up yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

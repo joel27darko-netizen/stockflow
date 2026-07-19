@@ -1,0 +1,13 @@
+{% macro transaction_badge(t) %}
+  {% if t.transaction_type.value == "stock_in" %}
+    <span class="badge bg-success">Stock In</span>
+  {% elif t.transaction_type.value == "stock_out" %}
+    <span class="badge bg-danger">Stock Out</span>
+  {% elif t.transaction_type.value == "transfer_out" %}
+    <span class="badge bg-primary"><i class="bi bi-box-arrow-right"></i> Transfer Out</span>
+  {% elif t.transaction_type.value == "transfer_in" %}
+    <span class="badge bg-info text-dark"><i class="bi bi-box-arrow-in-left"></i> Transfer In</span>
+  {% else %}
+    <span class="badge bg-warning text-dark">Adjustment</span>
+  {% endif %}
+{% endmacro %}

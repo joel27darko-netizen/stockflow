@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+{% block title %}Transactions - StockFlow{% endblock %}
+{% block page_heading %}Transactions{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-clock-history"></i> Transaction History</h3>
+
+<form method="get" action="/inventory/transactions" class="card sf-card p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small">Product</label>
+      <select name="product_id" class="form-select">
+        <option value="">All Products</option>
+        {% for p in products %}
+        <option value="{{ p.id }}" {% if product_id == p.id %}selected{% endif %}>{{ p.product_code }} — {{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small">Type</label>
+      <select name="transaction_type" class="form-select">
+        <option value="">All Types</option>
+        <option value="stock_in" {% if transaction_type == "stock_in" %}selected{% endif %}>Stock In</option>
+        <option value="stock_out" {% if transaction_type == "stock_out" %}selected{% endif %}>Stock Out</option>
+        <option value="transfer_out" {% if transaction_type == "transfer_out" %}selected{% endif %}>Transfer Out</option>
+        <option value="transfer_in" {% if transaction_type == "transfer_in" %}selected{% endif %}>Transfer In</option>
+        <option value="adjustment" {% if transaction_type == "adjustment" %}selected{% endif %}>Adjustment</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search"></i> Filter</button>
+    </div>
+  </div>
+</form>
+
+<div class="card sf-card">
+  <div class="card-body">
+    <div class="table-responsive">
+    <table class="table table-hover table-sm align-middle">
+      <thead>
+        <tr><th>Date</th><th>Product</th><th>Location</th><th>Type</th><th>Qty</th><th>Before</th><th>After</th><th>Reference</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+      {% for t in transactions %}
+        <tr>
+          <td class="text-nowrap">{{ t.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+          <td>{{ t.product.product_code if t.product else "—" }}</td>
+          <td>{{ t.location.display_name if t.location else "—" }}</td>
+          <td>{{ macros.transaction_badge(t) }}</td>
+          <td>{{ t.quantity }}</td>
+          <td>{{ t.quantity_before }}</td>
+          <td>{{ t.quantity_after }}</td>
+          <td>{{ t.reference or "—" }}</td>
+          <td>{{ t.notes or "—" }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9" class="text-center text-muted py-4">No transactions recorded yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
