@@ -1,6 +1,6 @@
 # StockFlow — Inventory & Warehouse Management System
 
-StockFlow is a full-stack inventory and warehouse management system built with **FastAPI**, **SQLAlchemy**, and **Jinja2 + Bootstrap 5**. It was built as a portfolio project to demonstrate backend architecture, database design, and full-stack delivery skills relevant to a **Dual Study (Duales Studium) Computer Science / System Integration** application.
+StockFlow is a full-stack inventory and warehouse management system built with **FastAPI**, **SQLAlchemy**, and **Jinja2 + Bootstrap 5**. It was built as a portfolio project to demonstrate backend architecture, database design, and full-stack delivery skills relevant to  Computer Science / System Integration** application.
 
 > Portfolio note: this project focuses on demonstrating clean architecture (Repository Pattern + Service Layer), concurrency-safe business logic, and end-to-end feature delivery — from database schema to a working, polished browser UI — rather than an exhaustive production feature set.
 
@@ -227,13 +227,14 @@ Note: a couple of the migrations needed hand-adjustment after autogeneration —
 
 > _Add screenshots here before submitting your portfolio. Suggested set:_
 
-- `docs/screenshots/dashboard.png` — Dashboard with KPI cards and charts
-- `docs/screenshots/products.png` — Product list (try both list and card view)
-- `docs/screenshots/product_detail.png` — Product detail with QR/barcode/photo
-- `docs/screenshots/stock_ops.png` — Stock In/Out/Adjustment/Transfer forms
-- `docs/screenshots/scanner.png` — Scanner page
-- `docs/screenshots/dark_mode.png` — Dark mode toggle
-- `docs/screenshots/reports.png` — Reports/export page
+<img width="952" height="456" alt="Capture01" src="https://github.com/user-attachments/assets/ca6af205-3af6-4836-a9b2-fdfef43f7d6d" />
+<img width="951" height="454" alt="Capture02" src="https://github.com/user-attachments/assets/8e57c2b4-42ec-4709-b9c1-047d77cddd29" />
+<img width="954" height="453" alt="Capture03" src="https://github.com/user-attachments/assets/c7454f8d-6b57-4c97-b946-830ab55413e5" />
+<img width="950" height="455" alt="Capture111" src="https://github.com/user-attachments/assets/882f0d16-ab19-4849-8a92-6551f9c74cbf" />
+<img width="953" height="454" alt="Capture040" src="https://github.com/user-attachments/assets/c9250a4f-cf90-479e-8e13-0e7a962d2684" />
+<img width="952" height="456" alt="Capture030" src="https://github.com/user-attachments/assets/9545b584-6c2b-43c4-b555-344d9be0aa4e" />
+<img width="953" height="453" alt="Capture12" src="https://github.com/user-attachments/assets/f4dcee9a-0605-4e7e-8742-10addc644db6" />
+
 
 ---
 
@@ -260,4 +261,4 @@ This section documents how the current design would evolve for production scale 
 
 ---
 
-Built as part of a preparation roadmap toward a Dual Study application, alongside a companion C++ Campus Management System and an Internet Hub reseller portal, to demonstrate range across systems programming, full-stack web development, and database-backed application design.
+
